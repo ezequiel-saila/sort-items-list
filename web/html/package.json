@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "jquery": "^3.5.1"
+  },
+  "name": "html",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "saila",
+  "license": "MIT"
+}

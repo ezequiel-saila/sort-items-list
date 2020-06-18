@@ -45,7 +45,9 @@ RESOURCES
 
 class Hello(Resource):
     def get(self):
-        return "Hello World!"
+        response = jsonify("Hello World!")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     
 
 class Register(Resource):
@@ -155,10 +157,10 @@ class Save(Resource):
         }
         return jsonify(retJson)
     
-api.add_resource(Hello, '/hello')
-api.add_resource(Register, '/register')
-api.add_resource(Retrieve, '/retrieve')
-api.add_resource(Save, '/save')
+api.add_resource(Hello, '/api/hello')
+api.add_resource(Register, '/api/register')
+api.add_resource(Retrieve, '/api/retrieve')
+api.add_resource(Save, '/api/save')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
