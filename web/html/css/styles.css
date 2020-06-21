@@ -1,3 +1,40 @@
-h1 {
-  color: RED;
+.container {
+	width: 700px;
+}
+.title {
+	margin: 25px auto;
+	font-family: verdana;
+}
+#sortable {
+	list-style-type: none;
+	padding-left: 0px;
+}
+.item {
+	margin: 5px;
+}
+.card img {
+	width: 238px;
+    height: 238px;
+    padding: 1.25rem;
+}
+.buttons-bar {
+	position: relative;
+	float: left;
+	width: 20px;
+	height: 100%;
+}
+.button-add-col {
+	padding-right: 5px !important;
+}
+.button-add-col a{
+	float: right;
+} 
+.total-items-col {
+	padding-left: 5px !important;
+}
+.total-items-col span {
+	vertical-align: -webkit-baseline-middle;
+}
+.requirements-text {
+	font-size: 12px;
 }
