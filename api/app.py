@@ -97,8 +97,7 @@ class Article(Resource):
                 raise Exception("Field description is required")
             
             if not order:
-                #buscar el maximo order e incrementar en 1
-                pass 
+                order = articles.find().count()
             
             item = buildArticleObjectToSave(
                 picture=picture,
@@ -132,7 +131,6 @@ class Article(Resource):
             id = data["id"]
             picture = data['picture']
             description = data['description']
-            order = data['order']
             
             if not id:
                 raise Exception("Field id is required")
