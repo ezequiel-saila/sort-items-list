@@ -1,7 +1,7 @@
 (function ($) {
 	
 	const api = new MyApi('http://localhost:5000/api');
-	const articleList = new ArticleList($('#sortable'), api);
+	const articleList = new ArticleList($('#sortable'), api, $('#total-items'));
     
 	/*
 	 * Flag to know if an item change its position 

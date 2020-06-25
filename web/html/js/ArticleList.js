@@ -1,9 +1,10 @@
 class ArticleList {
 	
-	constructor($root, $service) {
+	constructor($root, $service, $totalLabel) {
 		this.$root = $root;
 	    this.list = [];
 	    this.$service = $service;
+	    this.$totalLabel = $totalLabel;
 	}
 	
 	add(article) {
@@ -29,6 +30,7 @@ class ArticleList {
 	    		'id': article.id()
 	    	}).then(function(response){
 		    	self.list.splice(self.list.indexOf(article), 1);
+		    	self.updateItemCount();
 			    $('li[data-id="'+ article.id() +'"]').remove();
 			    deferred.resolve();
 			},function(error) {
@@ -73,6 +75,7 @@ class ArticleList {
 					)
 				);
 			}
+			self.updateItemCount();
 		});
 	}
 	
@@ -104,4 +107,7 @@ class ArticleList {
 		return this.$service.updateOrder(json);
 	}	
 	
+	updateItemCount() {
+		this.$totalLabel.text("Total items: " + this.list.length);
+	}	
 }

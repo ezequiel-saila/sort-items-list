@@ -12,9 +12,7 @@ function openModal(modal, id, blob, description) {
 	$('#' + modal).modal('show');
 }
 
-function updateItemCount() {
-	$('#total-items').text("Total items: " + getTotalItems());
-}
+
 
 function getTotalItems() {
 	return $('#sortable li').length;

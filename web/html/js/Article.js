@@ -39,14 +39,14 @@ class Article {
 			<li class="item" data-id="${this.id()}">
 				<div class="card">
 					<div class="row">
-						<div class="col-4">
+						<div class="col-3">
 							<img class="card-img-top" src="${this.blob()}" alt="${this.filename()}">
 						</div>
-						<div class="col-8">
+						<div class="col">
 							<div class="card-body">
 								<p class="card-text">${this.description()}</p>
-								<a href="#" class="btn btn-primary" data-id="${this.id()}" data-target="#item-edit-modal" data-toggle="modal">Edit</a>
-								<a href="#" class="btn btn-primary" data-id="${this.id()}" data-target="#item-remove-modal" data-toggle="modal">Remove</a>
+								<a href="#" class="btn btn-outline-success btn-sm btn-edit" data-id="${this.id()}" data-target="#item-edit-modal" data-toggle="modal">Edit</a>
+								<a href="#" class="btn btn-outline-danger btn-sm btn-remove" data-id="${this.id()}" data-target="#item-remove-modal" data-toggle="modal">Remove</a>
 							</div>
 						</div>
 					</div>
