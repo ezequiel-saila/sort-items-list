@@ -23,19 +23,23 @@ class ArticleList {
 		this.list.push(article);
 	    article.appendTo(this.$root);
 
-	    article.onRemove((callback) => {
+	    article.onRemove(() => {
+	    	var deferred = $.Deferred();
 	    	self.$service.remove({
 	    		'id': article.id()
 	    	}).then(function(response){
 		    	self.list.splice(self.list.indexOf(article), 1);
 			    $('li[data-id="'+ article.id() +'"]').remove();
-			    callback();
+			    deferred.resolve();
 			},function(error) {
+				deferred.reject();
 	    		console.log('onRemove error: ' + error);
 	    	});
+	    	return deferred;
 	    });
 	    
-	    article.onEdit((callback) => {
+	    article.onEdit(() => {
+	    	var deferred = $.Deferred();
 	    	self.$service.update({
     			"id": article.id(),	
     		    "picture": {
@@ -45,10 +49,12 @@ class ArticleList {
     		    "description": article.description()
 	    	}).then(function(response) {
 	    		self.refresh();
-	    		callback();
+	    		deferred.resolve();
 	    	},function(error) {
+	    		deferred.reject();
 	    		console.log('onEdit error: ' + error);
 	    	});
+	    	return deferred;
 	    });
 	}
 	
@@ -56,9 +62,7 @@ class ArticleList {
 		const self = this;
 		self.$service.list().then((response) => {
 			self.clear();
-			self.list = [];
 			for (var i=0;i<response.data.length;i++) {
-				console.log('appendArticle', i);
 				self.appendArticle(
 					new Article(
 						response.data[i].id, 
@@ -87,11 +91,17 @@ class ArticleList {
 	
 	clear() {
 		this.$root.empty();
+		this.list = [];
 	}
 	
 	updateOrder() {
-		console.log('updateOrder');
-	}
-	
+		var json = {
+			"ids": []
+		};
+		$(this.$root).children('li').each(function(index){
+			json.ids.push($(this).data('id'));
+		});
+		return this.$service.updateOrder(json);
+	}	
 	
 }

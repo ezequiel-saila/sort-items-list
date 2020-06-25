@@ -4,84 +4,78 @@
 	const articleList = new ArticleList($('#sortable'), api);
     
 	/*
-	 * Init Sortable
+	 * Flag to know if an item change its position 
+	 * on a drag&drop event.
 	 */
 	position_updated = false;
-	
+	/*
+	 * Init Sortable
+	 */
 	$("#sortable").sortable({
 	 	connectWith: "#sortable",
 		update: function(event, ui) {
-      		position_updated = !ui.sender; //if no sender, set sortWithin flag to true
+      		position_updated = !ui.sender;
 		},
       	stop: function(event, ui) {
 			if (position_updated) {
-				sortItems(function() {
+				articleList.updateOrder().then((response) => {
+					articleList.listArticles();
 					position_updated = false;	
 				});
 			}
 		}
 	}).disableSelection();
 	
-	function readFile(file) {
-		var deferred = $.Deferred();
-		if (file) {
-			var reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = deferred.resolve;
-		} else {
-			deferred.reject();
-		}
-		return deferred;
-	}
-	
 	/*
 	 * Modal Add Item
 	 */
 	$('#item-add-modal').on('show.bs.modal', (event) => {
+		$('#picture').val(null);
+		$('#description').val('');
+		$('#btn-add-item').unbind('click');
+		
 		$('#btn-add-item').on('click', () => {
-			readFile($("#picture")[0].files[0])
-			.then((e) => {
+			readFile($("#picture")[0].files[0]).then((e) => {
 				return articleList.add(
-					new Article(
-						null, 
-						$('#description').val(), 
-						$("#picture")[0].files[0].name, 
-						e.target.result,
-						null
-					)
+					new Article(null,$('#description').val(),$("#picture")[0].files[0].name,e.target.result,null)
 				)
 			}).then((response) => {
 				articleList.listArticles();
-				$('#picture').val(null);
-				$('#description').val('');
-				$('#btn-remove-item').unbind('click');
 				$('#item-add-modal').modal('hide');
 			});	  
 		});
-//		} else {
-//			$('.modal-title').text('Edit Article');
-//			var id = button.data('id');
-//			article = articleList.getArticle(id);
-//			$('#description').val(article.description());
-//			$('#btn-save-item').on('click', () => {
-//				console.log('save edit');
-//				$(this).detach();
-//				readFile($("#picture")[0].files[0])
-//				.then((e) => {
-//					article.description = $('#description').val();
-//					article.filename = $("#picture")[0].files[0].name;
-//					article.blob = e.target.result; 
-//					return article.save();
-//				}).then((response) => {
-//					modal.modal('hide')
-//				});			
-//			  });
-//			  console.log('edit'); 
-//		  }
-		  
+	});
+	
+	/*
+	 * Modal Edit Item
+	 */
+	$('#item-edit-modal').on('show.bs.modal', (event) => {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		article = articleList.getArticle(id);
+		$('#description-edit').text(article.description());
+		$('#btn-edit-item').unbind('click');
+		$('#btn-edit-item').on('click', () => {
+			if ($("#picture-edit")[0].files[0] === undefined) {
+				article.$description = $('#description-edit').val();
+				article.save().then((response) => {
+					articleList.listArticles();
+					$('#item-edit-modal').modal('hide')
+				});			
+			} else {
+				readFile($("#picture-edit")[0].files[0]).then((e) => {
+					article.$description = $('#description-edit').val();
+					article.$filename = $("#picture-edit")[0].files[0].name || article.filename();
+					article.$blob = e.target.result || article.blob(); 
+					article.save().then((response) => {
+						articleList.listArticles();
+						$('#item-edit-modal').modal('hide');
+					});	
+				});	
+			}	
+		 });
 	});
 	 
-	
 	/*
 	 * Modal Delete
 	 */
@@ -90,13 +84,16 @@
 		var id = button.data('id');
 		$('#btn-remove-item').on('click', () => {
 			var article = articleList.getArticle(id);
-			article.remove(() => {
+			article.remove().then(() => {
 				$('#btn-remove-item').unbind('click');
 				$('#item-remove-modal').modal('hide');
 			});
 		});
 	});
 	
+	/*
+	 * Get all items from DDBB and show it on web.
+	 */
 	articleList.listArticles();
 			
 }(jQuery));

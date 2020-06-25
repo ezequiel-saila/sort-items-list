@@ -31,7 +31,6 @@ class Article {
 	}
 	
 	appendTo($parent) {
-		console.log('executing');
 		$parent.append(this.asJquery());
 	}
 	
@@ -52,29 +51,8 @@ class Article {
 						</div>
 					</div>
 				</div>
-			</li>`); 
-		
-		const self = this;
-		
-//		/*
-//		 * Bind function onEdit
-//		 */
-//		$el.find('a:first').on('click', function(e){
-//			e.preventDefault();
-//			self._onEdit();
-//		});
-//		
-//		/*
-//		 * Bind function onRemove
-//		 */
-//		$el.find('a').last().on('click', function(e){
-//			e.preventDefault();
-//			$(this).detach();
-//			self._onRemove();
-//		});
-		
+			</li>`); 		
 		return $el;
-		
 	}
 	
 	onEdit(fn) {
