@@ -1,166 +1,242 @@
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 from pymongo import MongoClient
-import bcrypt
+from bson.objectid import ObjectId
+from flask_cors import CORS
+import datetime
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
-client = MongoClient("mongodb://my_db:27017")
+client = MongoClient("mongodb://my_db:27017") #mongodb://my_db:27017
 db = client.projectDB
-users = db["Users"]
-
+articles = db["Articles"]
 
 """
 HELPER FUNCTIONS
 """
-def userExist(username):
-    if users.find({"Username": username}).count() == 0:
-        return False
-    else:
-        return True
+def buildResponseError(**args):
+    response = jsonify({
+        "status": args["statusCode"],
+        "service": args["service"],
+        "args": args["args"],
+        "error": args["error"]
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response 
 
-def verifyUser(username, password):
-    if not userExist(username):
-        return False
-    
-    user_hashed_pw = users.find({
-        "Username": username
-    })[0]["Password"]
-    
-    if bcrypt.checkpw(password.encode('utf8'), user_hashed_pw):
-        return True
-    else:
-        return False
-    
-def getUserMessages(username):
-    return users.find({
-        "Username": username,
-    })[0]["Messages"]
-    
+def buildResponseSuccess(**args):
+    response = jsonify({
+        "status": args["statusCode"],
+        "service": args["service"],
+        "args": args["args"],
+        "data": args["data"]
+    })
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response 
+
+def buildArticleObjectToShow(item):
+    return {
+        "id": str(item.get('_id')),
+        "picture": item.get('picture'),
+        "description": item.get('description'),
+        "order": item.get('order'),
+        "creation_date": item.get('creation_date')
+    }
+
+def buildArticleObjectToSave(**args):
+    return {
+        "picture": args['picture'],
+        "description": args['description'],
+        "order": args['order'],
+        "creation_date": args['creation_date']
+    }    
     
 """
 RESOURCES
 """
+class Article(Resource):
+    
+    def get(self):
+        
+        try:
+            result = articles.find({}).sort("order")
+            objects = []
+            for item in result:
+                objects.append(
+                    buildArticleObjectToShow(item)
+                )
+            
+            return buildResponseSuccess(
+                statusCode=200,
+                service="GET: articles",
+                args=request.args,
+                data=objects
+            )
+            
+        except (Exception) as error:
+            return buildResponseError(
+                statusCode=400,
+                service="GET: articles",
+                args=request.args,
+                error=str(error)
+            )
+        
+    def post(self):
+        try:
+            data = request.get_json()
+            picture = data["picture"]
+            description = data["description"]
+            order = data["order"]
+            
+            if not picture:
+                raise Exception("Field picture is required")
+            
+            if not description:
+                raise Exception("Field description is required")
+            
+            if not order:
+                order = articles.count_documents({}) + 1
+            
+            item = buildArticleObjectToSave(
+                picture=picture,
+                description=description,
+                order=order,
+                creation_date=datetime.datetime.utcnow()
+            )
 
+            id = articles.insert_one(item).inserted_id
+            
+            return buildResponseSuccess(
+                statusCode=200,
+                service="POST: articles",
+                args=request.get_json(),
+                data={'id':str(id)}
+            )
+            
+        except (Exception) as error:
+            return buildResponseError(
+                statusCode=400,
+                service="POST: articles",
+                args=request.args,
+                error=str(error)
+            )
+            
+        
+    def put(self):
+        try:    
+            data = request.get_json()
+            
+            id = data["id"]
+            picture = data['picture']
+            description = data['description']
+            
+            if not id:
+                raise Exception("Field id is required")
+            
+            if not picture:
+                raise Exception("Field picture is required")
+            
+            if not description:
+                raise Exception("Field description is required")
+            
+            articles.update_one({
+                "_id": ObjectId(id)
+            }, {
+                "$set": {
+                    "picture": picture,
+                    "description": description
+                }
+            })
+  
+            return buildResponseSuccess(
+                statusCode=201,
+                service="PUT: articles",
+                args=request.get_json(),
+                data=[]
+            )
+            
+        except (Exception) as error:
+            return buildResponseError(
+                statusCode=400,
+                service="PUT: articles",
+                args=request.args,
+                error=str(error)
+            )
+        
+    def delete(self):
+        try:
+            
+            data = request.get_json()
+            id = data["id"]
+            
+            if not id:
+                raise Exception("Field id is required")
+            
+            articles.delete_one({"_id": ObjectId(id)})
+            
+            return buildResponseSuccess(
+                statusCode=201,
+                service="DELETE: articles",
+                args=request.get_json(),
+                data=[]
+            )
+            
+        except (Exception) as error:
+            return buildResponseError(
+                statusCode=400,
+                service="DELETE: articles",
+                args=request.args,
+                error=str(error)
+            )
+        
+class ArticleSort(Resource):
+    def put(self):
+        try:
+            data = request.get_json()
+            
+            ids = data["ids"]
+            
+            if not ids:
+                raise Exception("Field id is required")
+
+            for index, id in enumerate(ids, start=1):
+                articles.update_one({
+                    "_id": ObjectId(id)
+                }, {
+                    "$set": {
+                        "order": index
+                    }
+                })
+            
+            return buildResponseSuccess(
+                statusCode=201,
+                service="PUT: articles/sort",
+                args=request.get_json(),
+                data=[]
+            )
+            
+        except (Exception) as error:
+            return buildResponseError(
+                statusCode=400,
+                service="PUT: articles/sort",
+                args=request.args,
+                error=str(error)
+            )
+            
+    
+    
 class Hello(Resource):
     def get(self):
         response = jsonify("Hello World!")
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    
-
-class Register(Resource):
-    def post(self):
-        data = request.get_json()
-        
-        username = data["username"]
-        password = data["password"]
-        
-        if userExist(username):
-            retJson = {
-                "status": 301,
-                "msg": "Invalid Username"
-            }
-            return jsonify(retJson)
-        
-        hashed_pw = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
-        
-        users.insert({
-            "Username": username,
-            "Password": hashed_pw,
-            "Messages": []
-        })
-        
-        retJson = {
-            "status": 200,
-            "msg": "Registration successful"
-        }
-        return jsonify(retJson)
-    
-    
-class Retrieve(Resource):
-    def post(self):
-        data = request.get_json()
-        
-        username = data["username"]
-        password = data["password"]
-        
-        if not userExist(username):
-            retJson = {
-                "status": 301,
-                "msg": "Invalid Username"
-            }
-            return jsonify(retJson)
-        
-        correct_pw = verifyUser(username, password)
-        if not correct_pw:
-            retJson = {
-                "status": 302,
-                "msg": "Invalid password"
-            }
-            return jsonify(retJson)
-        
-        messages = getUserMessages(username)
-        
-        retJson = {
-            "status": 200,
-            "obj": messages
-        }
-        return jsonify(retJson)
-        
-class Save(Resource):
-    def post(self):
-        data = request.get_json()
-        
-        username = data["username"]
-        password = data["password"]
-        message = data["message"]
-        
-        if not userExist(username):
-            retJson = {
-                "status": 301,
-                "msg": "Invalid Username"
-            }
-            return jsonify(retJson)
-        
-        correct_pw = verifyUser(username, password)
-        if not correct_pw:
-            retJson = {
-                "status": 302,
-                "msg": "Invalid password"
-            }
-            return jsonify(retJson)
-        
-        if not message:
-            retJson = {
-                "status": 303,
-                "msg": "Please supply a valid message"
-            }
-            return jsonify(retJson)
-        
-        messages = getUserMessages(username)
-        
-        messages.append(message)
-        
-        users.update({
-            "Username": username
-        }, {
-            "$set": {
-                "Messages": messages
-            }
-        })
-        
-        retJson = {
-            "status": 200,
-            "obj": "Message has been saved successfully"
-        }
-        return jsonify(retJson)
-    
+       
+ 
 api.add_resource(Hello, '/api/hello')
-api.add_resource(Register, '/api/register')
-api.add_resource(Retrieve, '/api/retrieve')
-api.add_resource(Save, '/api/save')
+api.add_resource(ArticleSort, '/api/articles/sort')
+api.add_resource(Article, '/api/articles')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
