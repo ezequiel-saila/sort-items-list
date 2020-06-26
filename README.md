@@ -2,10 +2,12 @@
 
 ## v1.0
 
-###Requirements:
-###### 1. Docker
-###### 2. Docker Composer
+### Requirements:
 
+1. Docker
+2. Docker Composer
+
+##
 
 ### Installation instructions:
 
