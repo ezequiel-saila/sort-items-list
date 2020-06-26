@@ -1,4 +1,4 @@
-# sort-items-list
+# Sortable Items List
 
 ## v1.0
 
