@@ -2,6 +2,10 @@
 
 v1.0
 
+Requirements:
+- Docker
+- Docker Composer
+
 Installation instructions:
 
 1. Open a terminal

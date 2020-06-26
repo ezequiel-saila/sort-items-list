@@ -58,6 +58,9 @@ RESOURCES
 """
 class Article(Resource):
     
+    """
+    METHOD GET
+    """
     def get(self):
         
         try:
@@ -82,7 +85,10 @@ class Article(Resource):
                 args=request.args,
                 error=str(error)
             )
-        
+     
+    """
+    METHOD POST
+    """    
     def post(self):
         try:
             data = request.get_json()
@@ -123,7 +129,9 @@ class Article(Resource):
                 error=str(error)
             )
             
-        
+    """
+    METHOD PUT
+    """   
     def put(self):
         try:    
             data = request.get_json()
@@ -164,7 +172,9 @@ class Article(Resource):
                 args=request.args,
                 error=str(error)
             )
-        
+    """
+    METHOD DELETE
+    """    
     def delete(self):
         try:
             
@@ -192,6 +202,9 @@ class Article(Resource):
             )
         
 class ArticleSort(Resource):
+    """
+    METHOD PUT
+    """
     def put(self):
         try:
             data = request.get_json()
@@ -224,20 +237,16 @@ class ArticleSort(Resource):
                 args=request.args,
                 error=str(error)
             )
-            
-    
-    
-class Hello(Resource):
-    def get(self):
-        response = jsonify("Hello World!")
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
        
- 
-api.add_resource(Hello, '/api/hello')
+"""
+ROUTES
+"""
 api.add_resource(ArticleSort, '/api/articles/sort')
 api.add_resource(Article, '/api/articles')
 
+"""
+LAUNCH APP
+"""
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
         
