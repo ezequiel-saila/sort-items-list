@@ -16,7 +16,13 @@
 
 ```
 git clone https://github.com/ezequiel-saila/sort-items-list.git
+```
+```
 cd sort-items-list
+```
+```
 docker-compose build 
+```
+```
 docker-compose up -d
 ```
