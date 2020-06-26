@@ -33,15 +33,32 @@
 		$('#picture').val(null);
 		$('#description').val('');
 		$('#btn-add-item').unbind('click');
-		
+		$('#error-message-picture').text('');
+		$('#error-message-description').text('');
 		$('#btn-add-item').on('click', () => {
-			readFile($("#picture")[0].files[0]).then((e) => {
-				return articleList.add(
-					new Article(null,$('#description').val(),$("#picture")[0].files[0].name,e.target.result,null)
-				)
-			}).then((response) => {
-				articleList.listArticles();
-				$('#item-add-modal').modal('hide');
+			
+			if ($('#description').val() == '') {
+				$('#error-message-description').text('Description is required');
+				return false;
+			}
+				
+			isSupportedFileExtension($("#picture")[0].files[0])
+			.then(readFile)
+			.then(isSupportedImageSize)
+			.then((blob) => {
+				articleList.add(
+					new Article(null,$('#description').val(),$("#picture")[0].files[0].name,blob,null)
+				).then((response) => {
+					articleList.listArticles();
+					$('#item-add-modal').modal('hide');
+				}).fail((error) => {
+					//api level error
+					console.log('api', error);
+				});
+			}).fail((error) => {
+				//show error
+				$('#error-message-picture').text(error);
+				console.log('fail', error);
 			});	  
 		});
 	});
@@ -53,9 +70,17 @@
 		var button = $(event.relatedTarget);
 		var id = button.data('id');
 		article = articleList.getArticle(id);
-		$('#description-edit').text(article.description());
+		$('#error-message-picture-edit').text('');
+		$('#error-message-description-edit').text('');
+		$('#description-edit').val(article.description());
 		$('#btn-edit-item').unbind('click');
 		$('#btn-edit-item').on('click', () => {
+			
+			if ($('#description-edit').val() == '') {
+				$('#error-message-description-edit').text('Description is required');
+				return false;
+			}
+			
 			if ($("#picture-edit")[0].files[0] === undefined) {
 				article.$description = $('#description-edit').val();
 				article.save().then((response) => {
@@ -63,14 +88,24 @@
 					$('#item-edit-modal').modal('hide')
 				});			
 			} else {
-				readFile($("#picture-edit")[0].files[0]).then((e) => {
+				isSupportedFileExtension($("#picture-edit")[0].files[0])
+				.then(readFile)
+				.then(isSupportedImageSize)
+				.then((blob) => {
 					article.$description = $('#description-edit').val();
 					article.$filename = $("#picture-edit")[0].files[0].name || article.filename();
-					article.$blob = e.target.result || article.blob(); 
+					article.$blob = blob || article.blob(); 
 					article.save().then((response) => {
 						articleList.listArticles();
 						$('#item-edit-modal').modal('hide');
+					}).fail((error) => {
+						//api level error
+						console.log('api', error);
 					});	
+				}).fail((error) => {
+					//show error
+					$('#error-message-picture-edit').text(error);
+					console.log('fail', error);
 				});	
 			}	
 		 });

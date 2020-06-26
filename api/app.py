@@ -9,7 +9,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
-client = MongoClient("localhost", 27017) #mongodb://my_db:27017
+client = MongoClient("mongodb://my_db:27017") #mongodb://my_db:27017
 db = client.projectDB
 articles = db["Articles"]
 
@@ -97,7 +97,7 @@ class Article(Resource):
                 raise Exception("Field description is required")
             
             if not order:
-                order = articles.find().count()
+                order = articles.count_documents({}) + 1
             
             item = buildArticleObjectToSave(
                 picture=picture,
@@ -141,7 +141,7 @@ class Article(Resource):
             if not description:
                 raise Exception("Field description is required")
             
-            articles.update({
+            articles.update_one({
                 "_id": ObjectId(id)
             }, {
                 "$set": {
@@ -202,7 +202,7 @@ class ArticleSort(Resource):
                 raise Exception("Field id is required")
 
             for index, id in enumerate(ids, start=1):
-                articles.update({
+                articles.update_one({
                     "_id": ObjectId(id)
                 }, {
                     "$set": {

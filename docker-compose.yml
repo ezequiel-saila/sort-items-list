@@ -5,12 +5,12 @@ services:
       build: "./web"
       ports:
          - "8000:90"
-#   api:
-#      build: "./api"
-#      ports:
-#         - "5000:5000"
-#      links:
-#         - my_db
+   api:
+      build: "./api"
+      ports:
+         - "5000:5000"
+      links:
+         - my_db
          
    my_db:
       build: "./db"

@@ -62,3 +62,6 @@
 	font-size: 12px;
 	margin-bottom: 35px;
 }
+.input-group.mb-3 {
+	margin-bottom: 0px !important;
+}
