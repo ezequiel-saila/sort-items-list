@@ -1,11 +1,15 @@
 # sort-items-list
 
-v1.0
+## v1.0
 
-Installation instructions:
+### Installation instructions:
 
-1. Open a terminal
-2. git clone https://github.com/ezequiel-saila/sort-items-list.git
-3. cd sort-items-list
-4. docker-compose build 
-5. docker-compose up
+1. Open a terminal.
+2. Run the commands below:
+
+```
+git clone https://github.com/ezequiel-saila/sort-items-list.git
+cd sort-items-list
+docker-compose build 
+docker-compose up
+```
