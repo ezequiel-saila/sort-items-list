@@ -5,7 +5,7 @@
 ### Requirements:
 
 1. Docker
-2. Docker Composer
+2. Docker Compose
 
 ##
 
